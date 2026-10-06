@@ -67,6 +67,12 @@ export class StaleSignalExpiryJob {
         closedAt: now,
       })
       .where('status = :active', { active: SignalStatus.ACTIVE })
+      // Issue #992 expires stale cards that have not been swiped. Successful
+      // swipe execution persists a trade keyed by signal_id, so preserve any
+      // signal already consumed by the trade path even if it remains ACTIVE.
+      .andWhere(
+        'NOT EXISTS (SELECT 1 FROM trades trade WHERE trade.signal_id = signals.id)',
+      )
       .andWhere('(created_at <= :cutoff OR expires_at <= :now)', {
         cutoff,
         now,
