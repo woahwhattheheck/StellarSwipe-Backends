@@ -91,6 +91,9 @@ describe('StaleSignalExpiryJob', () => {
       active: SignalStatus.ACTIVE,
     });
     expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+      'NOT EXISTS (SELECT 1 FROM trades trade WHERE trade.signal_id = signals.id)',
+    );
+    expect(queryBuilder.andWhere).toHaveBeenCalledWith(
       '(created_at <= :cutoff OR expires_at <= :now)',
       { cutoff, now },
     );
