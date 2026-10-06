@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BullModule } from '@nestjs/bull';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { Signal } from './entities/signal.entity';
 import { CopiedPosition } from './entities/copied-position.entity';
 import { PremiumSubscription } from './entities/premium-subscription.entity';
@@ -23,9 +24,12 @@ import { AnalyzeSignalDecayJob } from './decay-analysis/jobs/analyze-signal-deca
 import { CacheModule } from '../cache/cache.module';
 import { SignalQuotaService } from './quota/signal-quota.service';
 import { SignalStatusSubscriber } from '../common/subscribers/signal-status.subscriber';
+import { StaleSignalExpiryJob } from './jobs/stale-signal-expiry.job';
 
 @Module({
   imports: [
+    ConfigModule,
+    ScheduleModule.forRoot(),
     TypeOrmModule.forFeature([
       Signal,
       CopiedPosition,
@@ -69,6 +73,7 @@ import { SignalStatusSubscriber } from '../common/subscribers/signal-status.subs
     AnalyzeSignalDecayJob,
     SignalQuotaService,
     SignalStatusSubscriber,
+    StaleSignalExpiryJob,
   ],
   controllers: [SignalsController, SignalVersionController],
   exports: [
